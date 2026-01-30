@@ -1,11 +1,10 @@
 pipeline {
     agent any
 
-   tools {
-    maven 'Maven 3.9'
-    jdk 'JDK 25'
-}
-
+    tools {
+        maven 'Maven 3.9'
+        jdk 'JDK 25'
+    }
 
     stages {
 
@@ -19,14 +18,26 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the Java application with Maven...'
-                bat 'mvn clean compile'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn clean compile'
+                    } else {
+                        bat 'mvn clean compile'
+                    }
+                }
             }
         }
 
         stage('Unit Test') {
             steps {
                 echo 'Running unit tests...'
-                bat 'mvn test'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn test'
+                    } else {
+                        bat 'mvn test'
+                    }
+                }
             }
             post {
                 always {
@@ -39,7 +50,13 @@ pipeline {
         stage('Package') {
             steps {
                 echo 'Packaging the application...'
-                bat 'mvn package -DskipTests'
+                script {
+                    if (isUnix()) {
+                        sh 'mvn package -DskipTests'
+                    } else {
+                        bat 'mvn package -DskipTests'
+                    }
+                }
             }
             post {
                 success {
