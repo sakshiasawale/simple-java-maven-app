@@ -10,38 +10,22 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out source code from GitHub...'
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Building the Java application with Maven...'
-                script {
-                    if (isUnix()) {
-                        sh 'mvn clean compile'
-                    } else {
-                        bat 'mvn clean compile'
-                    }
-                }
+                sh 'mvn clean compile'
             }
         }
 
         stage('Unit Test') {
             steps {
-                echo 'Running unit tests...'
-                script {
-                    if (isUnix()) {
-                        sh 'mvn test'
-                    } else {
-                        bat 'mvn test'
-                    }
-                }
+                sh 'mvn test'
             }
             post {
                 always {
-                    echo 'Archiving test results...'
                     junit 'target/surefire-reports/*.xml'
                 }
             }
@@ -49,29 +33,13 @@ pipeline {
 
         stage('Package') {
             steps {
-                echo 'Packaging the application...'
-                script {
-                    if (isUnix()) {
-                        sh 'mvn package -DskipTests'
-                    } else {
-                        bat 'mvn package -DskipTests'
-                    }
-                }
+                sh 'mvn package -DskipTests'
             }
             post {
                 success {
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                    archiveArtifacts artifacts: 'target/*.jar'
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Check the logs for details.'
         }
     }
 }
